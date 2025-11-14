@@ -1,5 +1,19 @@
 # README: CSC207 Arcade - Multiple Choice Quiz Module
 
+## 🚀 Getting Started
+
+This project is now **fully implemented** and ready to run! To start the application:
+
+```bash
+# Quick start with Maven
+mvn clean compile exec:java -Dexec.mainClass="com.csc207.arcade.multiplechoice.app.Main"
+
+# Or use the run script (Unix/Linux/Mac)
+./run.sh
+```
+
+For detailed instructions, see [RUNNING.md](RUNNING.md).
+
 ## 1. 🎯 Project Overview
 
 This document outlines the architecture and implementation plan for the **Multiple Choice Quiz Module**, a standalone component of the "CSC207 Arcade" project. This module is designed to be developed independently but easily integrated into the main Java Swing application.
