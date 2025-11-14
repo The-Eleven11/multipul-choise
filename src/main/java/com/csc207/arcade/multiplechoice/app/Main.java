@@ -55,8 +55,8 @@ public class Main {
                     if ("accuracy".equals(evt.getPropertyName()) && !resultsShown) {
                         resultsShown = true;
                         SwingUtilities.invokeLater(() -> {
-                            quizView.setVisible(false);
-                            resultsView.show();
+                            quizView.dispose(); // Dispose instead of just hiding
+                            resultsView.setVisible(true); // Use setVisible instead of deprecated show()
                         });
                     }
                 }

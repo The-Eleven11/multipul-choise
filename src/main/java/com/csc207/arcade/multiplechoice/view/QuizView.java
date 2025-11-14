@@ -119,12 +119,16 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             // Reset colors first, then highlight the incorrect button in red immediately
             resetButtonColors();
             String incorrectButton = viewModel.getIncorrectButton();
-            setButtonColor(incorrectButton, Color.RED);
+            if (incorrectButton != null) {
+                setButtonColor(incorrectButton, Color.RED);
+            }
         } else if ("CORRECT".equals(state)) {
             // Reset colors first, then highlight the correct button in green
             resetButtonColors();
             String correctButton = viewModel.getIncorrectButton(); // This now contains the selected answer
-            setButtonColor(correctButton, Color.GREEN);
+            if (correctButton != null) {
+                setButtonColor(correctButton, Color.GREEN);
+            }
             
             // Auto-advance after a 1-second delay to show the green color
             if (autoAdvanceTimer != null) {

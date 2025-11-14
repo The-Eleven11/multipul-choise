@@ -21,6 +21,7 @@ public class QuizPresenter implements QuizOutputBoundary, SubmitAnswerOutputBoun
     public void prepareQuizView(QuizOutputData data) {
         quizViewModel.setCurrentImagePath(data.getImagePath());
         quizViewModel.setQuestionProgressLabel(data.getQuestionProgress());
+        quizViewModel.setIncorrectButton(null); // Clear previous button selection
         quizViewModel.setFeedbackState("NONE");
     }
 
