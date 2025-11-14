@@ -23,7 +23,7 @@ public class ResultsView extends JFrame implements PropertyChangeListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         
-        JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
         
         JLabel titleLabel = new JLabel("Quiz Complete!", SwingConstants.CENTER);
@@ -35,13 +35,22 @@ public class ResultsView extends JFrame implements PropertyChangeListener {
         timeLabel = new JLabel("Time: 0s", SwingConstants.CENTER);
         timeLabel.setFont(new Font("Arial", Font.PLAIN, 24));
         
+        // Add Finish button
+        JButton finishButton = new JButton("Finish");
+        finishButton.setFont(new Font("Arial", Font.BOLD, 18));
+        finishButton.addActionListener(e -> {
+            dispose(); // Close the window
+            System.exit(0); // Exit the application
+        });
+        
         panel.add(titleLabel);
         panel.add(accuracyLabel);
         panel.add(timeLabel);
+        panel.add(finishButton);
         
         add(panel, BorderLayout.CENTER);
         
-        setSize(400, 300);
+        setSize(400, 350);
         setLocationRelativeTo(null);
     }
 

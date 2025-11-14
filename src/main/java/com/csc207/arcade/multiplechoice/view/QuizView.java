@@ -115,40 +115,29 @@ public class QuizView extends JFrame implements PropertyChangeListener {
     private void handleFeedbackState() {
         String state = viewModel.getFeedbackState();
         
-        // Reset button colors
-        resetButtonColors();
-        
         if ("INCORRECT".equals(state)) {
-            // Highlight the incorrect button in red
+            // Highlight the incorrect button in red immediately
             String incorrectButton = viewModel.getIncorrectButton();
             setButtonColor(incorrectButton, Color.RED);
         } else if ("CORRECT".equals(state)) {
-            // Find and highlight the correct button in green
-            // We need to determine which button was clicked
-            // For simplicity, we'll set all buttons to check which one matches
-            setCorrectButtonGreen();
+            // Highlight the correct button in green
+            String correctButton = viewModel.getIncorrectButton(); // This now contains the selected answer
+            setButtonColor(correctButton, Color.GREEN);
             
-            // Auto-advance after a delay
+            // Auto-advance after a delay to show the green color
             if (autoAdvanceTimer != null) {
                 autoAdvanceTimer.stop();
             }
             autoAdvanceTimer = new Timer(1000, e -> {
-                resetButtonColors();
+                // Timer callback is handled by the next question loading
                 autoAdvanceTimer.stop();
             });
             autoAdvanceTimer.setRepeats(false);
             autoAdvanceTimer.start();
         } else if ("NONE".equals(state)) {
+            // Reset button colors when moving to a new question
             resetButtonColors();
         }
-    }
-
-    private void setCorrectButtonGreen() {
-        // Since we don't track which button was clicked in the feedback,
-        // we'll just enable all buttons and reset colors
-        // The correct answer highlighting will happen through the incorrect button logic
-        // For now, let's just reset - the green will show briefly before next question loads
-        resetButtonColors();
     }
 
     private void setButtonColor(String button, Color color) {
