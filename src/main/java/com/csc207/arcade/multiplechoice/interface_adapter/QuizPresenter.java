@@ -27,14 +27,14 @@ public class QuizPresenter implements QuizOutputBoundary, SubmitAnswerOutputBoun
 
     @Override
     public void prepareSuccessView(SubmitAnswerOutputData data) {
-        quizViewModel.setFeedbackState("CORRECT");
         quizViewModel.setIncorrectButton(data.getSelectedAnswer()); // Reuse this to track selected button
+        quizViewModel.setFeedbackState("CORRECT");
     }
 
     @Override
     public void prepareFailView(SubmitAnswerOutputData data) {
-        quizViewModel.setFeedbackState("INCORRECT");
         quizViewModel.setIncorrectButton(data.getSelectedAnswer());
+        quizViewModel.setFeedbackState("INCORRECT");
     }
 
     @Override

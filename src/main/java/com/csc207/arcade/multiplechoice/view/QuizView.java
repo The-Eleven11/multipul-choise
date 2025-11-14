@@ -34,7 +34,7 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         
         // Set up frame
         setTitle("Multiple Choice Quiz");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         
         // Top panel: Image
