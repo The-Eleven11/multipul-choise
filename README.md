@@ -1,424 +1,315 @@
-📘 CSC207 Arcade — Multiple Choice Quiz Module
-Clean Architecture Implementation · Standalone + Future Integration Ready
-1. Overview
-
-This module implements the Multiple-Choice Quiz component of the CSC207 Arcade desktop application.
-
-The final full project is a Java/Swing–based Duolingo-style learning platform for CSC207 material.
-This module handles only the Multiple-Choice game, but:
-
-it must be fully standalone runnable,
-
-it must follow Clean Architecture,
-
-it must be easy to integrate into the main system later.
-
-The Multiple-Choice game flow:
-
-User clicks “Multiple Choice Quiz” from main menu (handled by main project).
-
-This module launches a separate Swing window.
-
-Each quiz question displays:
-
-a resized screenshot at the top
-
-four answer buttons (A/B/C/D) below
-
-User selects an option → it is validated immediately
-
-wrong → button becomes red
-
-correct → button becomes green, then automatically loads next question
-
-After 15 questions, the result screen shows:
-
-accuracy
-
-total time spent
-
-Question data are stored as screenshots in a folder, named like:
-
-id001_level1_answerA.png
-id002_level3_answerC.png
-...
-
-
-On startup, a question importer scans that folder and generates a single questions.json file.
-
-2. Directory Structure (Clean Architecture)
-src/
- ├── entities/
- │    └── Question.java
- │    └── QuizResult.java
- │
- ├── usecases/
- │    ├── generatejson/
- │    │      └── QuestionGenerationInteractor.java
- │    │      └── QuestionGenerationInputBoundary.java
- │    │      └── QuestionGenerationOutputBoundary.java
- │    │      └── QuestionMetadataExtractor.java
- │    │
- │    ├── runquiz/
- │    │      └── QuizInteractor.java
- │    │      └── QuizInputBoundary.java
- │    │      └── QuizOutputBoundary.java
- │    │      └── QuizTimer.java
- │
- ├── interface_adapters/
- │    ├── controllers/
- │    │       └── QuestionGenerationController.java
- │    │       └── QuizController.java
- │    │
- │    ├── presenters/
- │    │       └── QuestionGenerationPresenter.java
- │    │       └── QuizPresenter.java
- │    │
- │    ├── gateways/
- │    │       └── QuestionJsonGateway.java
- │    │       └── ScreenshotFolderGateway.java
- │
- ├── frameworks/
- │    ├── ui/
- │    │      └── QuizWindow.java
- │    │      └── ResultWindow.java
- │    │
- │    └── data/
- │           └── JsonFileWriter.java
- │           └── JsonFileReader.java
- │
- └── Main.java
-
-3. Data Format
-questions.json
-
-Generated at startup:
-
-{
-  "questions": [
-    {
-      "id": "001",
-      "level": 1,
-      "correctAnswer": "A",
-      "imagePath": "questions/id001_level1_answerA.png"
-    },
-    {
-      "id": "002",
-      "level": 3,
-      "correctAnswer": "C",
-      "imagePath": "questions/id002_level3_answerC.png"
-    }
-  ]
-}
-
-🧠 4. Entities Layer
-
-Entities contain only business rules.
-
-4.1 Question Entity
-Responsibilities
-
-represents a single MC question
-
-immutable
-
-contains no UI logic
-
-Fields
-private final String id;
-private final int level;
-private final String correctAnswer; // "A" | "B" | "C" | "D"
-private final String imagePath;
-
-4.2 QuizResult Entity
-
-Tracks result summary:
-
-private final int totalQuestions;
-private final int correctCount;
-private final long timeMillis;
-
-⚙ 5. Use Cases Layer
-5.1 Use Case 1 — Generate JSON from Screenshot Folder
-Purpose
-
-Scan a folder at startup
-
-Detect file patterns like id012_level2_answerC.png
-
-Convert to Question entities
-
-Write all of them into questions.json
-
-File naming parser logic
-
-Filename format:
-
-idXXX_levelY_answerZ.png
-
-
-Extraction rules:
-
-XXX → question id
-
-Y → difficulty level
-
-Z → correct answer
-
-5.1.1 QuestionGenerationInteractor
-Responsibilities
-
-orchestrates scanning, parsing, creating Questions, writing JSON
-
-Key Methods
-public void generate(String folderPath, String outputJsonPath);
-
-Steps Performed
-
-Read all PNG files from folder
-
-For each filename:
-
-extract id, level, correctAnswer
-
-Create Question entity
-
-Collect into a list
-
-Output a single JSON object via QuestionJsonGateway
-
-Presenter notifies UI (console or dialog)
-
-5.1.2 QuestionMetadataExtractor
-
-Handles regex logic:
-
-Pattern pattern = Pattern.compile("id(\\d+)_level(\\d+)_answer([A-D])\\.png");
-
-5.1.3 Gateways
-● ScreenshotFolderGateway
-
-Reads files from folder.
-
-● QuestionJsonGateway
-
-Writes the completed JSON file.
-
-5.2 Use Case 2 — Run the Quiz
-
-Handled by QuizInteractor.
-
-Responsibilities
-
-manage state of current question index
-
-validate user answer
-
-track score + timer
-
-notify presenter for UI updates
-
-Quiz Flow (Use Case Layer)
-Step 1 — Load Questions
-
-QuizInteractor.loadQuestions() uses:
-
-JsonFileReader
-
-converts JSON → List<Question>
-
-Step 2 — Start Quiz
-QuizInteractor.startQuiz(questions);
-QuizTimer.start();
-
-Step 3 — User selects answer
-
-Flow:
-
-Controller calls:
-
-quizInteractor.submitAnswer("B");
-
-
-Interactor checks correctness
-
-Presenter is triggered:
-
-showCorrect()
-
-showIncorrect()
-
-If correct → move to next question
-
-Step 4 — Quiz ends
-
-Presenter receives final result:
-
-accuracy
-
-time spent
-
-Displayed in a ResultWindow.
-
-🎨 6. Interface Adapters Layer
-6.1 Controllers
-QuizController
-
-Connects UI → use case:
-
-public void onAnswerSelected(String answer);
-public void onStartQuiz();
-
-QuestionGenerationController
-
-Initiates the JSON creation process:
-
-public void generateQuestions();
-
-6.2 Presenters
-QuizPresenter
-
-Outputs pure data for UI (no Swing code):
-
-public void presentCorrect();
-public void presentIncorrect();
-public void presentNextQuestion(Question question);
-public void presentResult(QuizResult result);
-
-6.3 Gateways
-JsonFileReader
-
-Loads JSON into plain Java Maps or entity factories.
-
-JsonFileWriter
-
-Serializes entities → JSON.
-
-🖥 7. Frameworks Layer (Swing UI)
-
-Contains Swing-specific classes.
-No business logic.
-
-7.1 QuizWindow
-Layout
------------------------------------------
-|           [Image JLabel]              |
-|         auto-resized to fit           |
------------------------------------------
-|  [A Button]   [B Button]   [C Button]  |
-|               [D Button]              |
------------------------------------------
-
-Responsibilities
-
-render question image
-
-resize image based on window size
-
-link button clicks to QuizController
-
-dynamically recolor answer button (green/red)
-
-load next question
-
-Key Methods
-public void displayQuestion(Question q);
-private void updateImage(String imagePath);
-public void highlightCorrect(String answer);
-public void highlightIncorrect(String answer);
-
-7.2 Image Auto-Resizing Specification
-
-When loading an image:
-
-get window’s available width/height
-
-scale image proportionally
-
-set into JLabel
-
-Use:
-
-Image scaled = original.getScaledInstance(targetW, targetH, Image.SCALE_SMOOTH);
-
-7.3 ResultWindow
-
-Displays summary:
-
-correct count
-
-accuracy %
-
-time elapsed
-
-🚀 8. Program Startup Flow
-Startup Sequence
-Main
- ├── run QuestionGenerationController.generate()
- ├── load questions.json via QuizInteractor
- └── open QuizWindow
-
-
-Full Flow:
-
-Scan folder → generate JSON
-
-Load all questions
-
-Start quiz
-
-Show UI
-
-User answers 15 questions
-
-Show result window
-
-🔌 9. Integration Into CSC207 Full Platform
-
-To integrate later:
-
-Add a button in the main menu:
-new MultipleChoiceLauncher().launch();
-
-MultipleChoiceLauncher:
-public class MultipleChoiceLauncher {
-    public void launch() {
-       // initialize interactor + presenter + ui
-       QuizWindow window = new QuizWindow(controller);
-       window.setVisible(true);
-    }
-}
-
-💡 10. Copilot Startup Prompt Tips
-
-To make Copilot write correct code:
-
-You are working in a Clean Architecture Java/Swing project.
-You must NOT put UI code in use cases or entities.
-All business logic goes into interactors.
-All Swing logic goes into QuizWindow and ResultWindow.
-The module scans a screenshot folder, extracts id/level/answer from filenames, and generates questions.json.
-QuizInteractor loads Question entities, handles correctness checking, updates score, and moves to next question.
-QuizPresenter exposes pure data and delegates UI rendering to QuizWindow.
-Images must auto-scale to the window size.
-Do not use external libraries other than standard Java + javax.swing + org.json.
-
-🏁 11. Summary
-
-This README provides:
-
-Clean Architecture structure
-
-Detailed module responsibilities
-
-Full JSON generation pipeline
-
-Quiz run pipeline
-
-UI resizing behavior
-
-Class responsibilities & method signatures
-
-Clear integration strategy
-
-Copilot startup rules
+# README: CSC207 Arcade - Multiple Choice Quiz Module
+
+## 1. 🎯 Project Overview
+
+This document outlines the architecture and implementation plan for the **Multiple Choice Quiz Module**, a standalone component of the "CSC207 Arcade" project. This module is designed to be developed independently but easily integrated into the main Java Swing application.
+
+This module fulfills **User Story 1**: "As a user, I want to take short multiple-choice quizzes on topics I choose so that I can quickly test and reinforce my understanding."
+
+The primary goal is to create a quiz window that:
+1.  Loads 15 questions from a predefined data source.
+2.  Displays each question as an image.
+3.  Allows the user to select one of four (A, B, C, D) button options.
+4.  Provides **immediate visual feedback**:
+    * **Incorrect Answer:** The selected button turns **red**.
+    * **Correct Answer:** The selected button turns **green**.
+5.  **Automatically advances** to the next question *only* after the correct answer is selected.
+6.  Displays a **final results screen** with accuracy (percentage) and total time taken.
+
+## 2. 🏛️ Core Architecture: Clean Architecture
+
+To ensure modularity and future integration, we will strictly follow Clean Architecture principles.
+
+* **Entities:** Core business objects (e.g., `QuizQuestion`, `QuizSession`). They know nothing about the rest of the application.
+* **Use Cases (Interactors):** Application-specific logic (e.g., `SubmitAnswer`, `StartQuiz`). They orchestrate the flow of data between Entities and Interface Adapters.
+* **Interface Adapters:** Connects Use Cases to the outside world (e.g., `QuizController`, `QuizPresenter`, `JsonQuestionRepository`).
+* **Frameworks & Drivers:** The outermost layer (e.g., Java Swing UI, JSON file operations).
+
+![Clean Architecture Diagram](https://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg)
+
+## 3. 🗂️ Proposed Directory Structure
+
+```
+
+/src
+├── main
+│   ├── java
+│   │   └── com
+│   │       └── csc207
+│   │           └── arcade
+│   │               └── multiplechoice
+│   │                   ├── app/                \# Main entry point & Dependency Injection
+│   │                   │   └── Main.java
+│   │                   │   └── DataInitializer.java
+│   │                   ├── data\_access/        \# Data implementation
+│   │                   │   └── JsonQuestionRepository.java
+│   │                   ├── entities/           \# Core business logic
+│   │                   │   └── QuizQuestion.java
+│   │                   │   └── QuizSession.java
+│   │                   ├── interface\_adapter/  \# Controllers, Presenters, ViewModels
+│   │                   │   └── QuizController.java
+│   │                   │   └── QuizPresenter.java
+│   │                   │   └── QuizViewModel.java
+│   │                   │   └── ResultsController.java
+│   │                   │   └── ResultsPresenter.java
+│   │                   │   └── ResultsViewModel.java
+│   │                   ├── use\_case/           \# Application business logic
+│   │                   │   ├── QuestionRepository.java   (Interface)
+│   │                   │   ├── quiz/
+│   │                   │   │   ├── QuizInputBoundary.java
+│   │                   │   │   ├── QuizInputData.java
+│   │                   │   │   ├── QuizInteractor.java
+│   │                   │   │   ├── QuizOutputBoundary.java
+│   │                   │   │   └── QuizOutputData.java
+│   │                   │   └── submit/
+│   │                   │       ├── SubmitAnswerInputBoundary.java
+│   │                   │       ├── SubmitAnswerInputData.java
+│   │                   │       ├── SubmitAnswerInteractor.java
+│   │                   │       ├── SubmitAnswerOutputBoundary.java
+│   │                   │       └── SubmitAnswerOutputData.java
+│   │                   └── view/               \# Java Swing components
+│   │                       ├── QuizView.java
+│   │                       ├── ResultsView.java
+│   │                       └── ScaledImagePanel.java   (Custom component)
+│   └── resources
+│       └── data
+│           ├── questions.json                  \# Generated database
+│           └── images/                         \# Raw question images
+│               ├── id001\_level1\_answerB.png
+│               ├── id002\_level2\_answerA.png
+│               └── ...
+└── test
+└── java
+
+````
+
+## 4. ⚙️ Data Pipeline: Image Files to JSON
+
+A critical requirement is to load quiz data from image filenames. We will use a startup utility for this.
+
+### Step 1: `DataInitializer.java` (in `app` package)
+
+This utility class will be run *once* at application startup (called from `Main.java`).
+
+* **Action:** Scans the `src/main/resources/data/images/` directory.
+* **Parsing:** Uses a regular expression to parse each filename.
+    * **Pattern:** `(id\d+)_level(\d+)_answer([ABCD])\.png`
+    * **Example:** `id001_level1_answerB.png`
+        * Group 1 (ID): `id001`
+        * Group 2 (Level): `1`
+        * Group 3 (Answer): `B`
+* **Output:** Generates a list of `QuizQuestion` objects and serializes them into `src/main/resources/data/questions.json`.
+
+### Step 2: `questions.json` (in `resources/data` package)
+
+This file is the "database" for the application. It will be read by the `JsonQuestionRepository`.
+
+**JSON Structure:**
+```json
+[
+  {
+    "questionId": "id001",
+    "imagePath": "data/images/id001_level1_answerB.png",
+    "level": 1,
+    "correctAnswer": "B"
+  },
+  {
+    "questionId": "id002",
+    "imagePath": "data/images/id002_level2_answerA.png",
+    "level": 2,
+    "correctAnswer": "A"
+  }
+]
+````
+
+> **Note:** The `imagePath` must be relative to the `resources` root so it can be loaded by `class.getResource()`.
+
+## 5\. 🧱 Component Implementation Details
+
+### Entities (`entities` package)
+
+  * **`QuizQuestion.java`**
+
+      * A simple Plain Old Java Object (POJO).
+      * Fields: `String questionId`, `String imagePath`, `int level`, `String correctAnswer`.
+      * Getters and setters (or a constructor).
+
+  * **`QuizSession.java`**
+
+      * Manages the state of a single quiz playthrough.
+      * Fields:
+          * `List<QuizQuestion> questions`: The 15 questions for this session.
+          * `int currentQuestionIndex`: Tracks the current question (0-14).
+          * `int correctAnswersCount`: Number of correct answers.
+          * `long startTime`: `System.currentTimeMillis()` captured at the start.
+          * `long endTime`: Captured at the end.
+      * Methods:
+          * `QuizQuestion getCurrentQuestion()`: Returns `questions.get(currentQuestionIndex)`.
+          * `void recordAnswer(boolean isCorrect)`: If `isCorrect`, increments `correctAnswersCount`.
+          * `boolean advanceToNextQuestion()`: Increments `currentQuestionIndex`. Returns `true` if there are more questions, `false` if the quiz is over.
+          * `double getAccuracy()`: Calculates `(double)correctAnswersCount / questions.size()`.
+          * `long getTotalTime()`: Calculates `endTime - startTime`.
+          * `boolean isQuizOver()`: Checks if `currentQuestionIndex` is at the end.
+
+### Use Cases (`use_case` package)
+
+  * **`QuestionRepository.java` (Interface)**
+
+      * Defines the contract for data access.
+      * Methods:
+          * `void loadData()`: (Optional) Triggers loading from the data source.
+          * `List<QuizQuestion> getQuestions(int count)`: Gets `count` random questions.
+
+  * **`QuizInteractor.java` (Implements `QuizInputBoundary`)**
+
+      * **Purpose:** To start the quiz and load the first question.
+      * **Dependencies:** `QuestionRepository`, `QuizOutputBoundary` (the Presenter).
+      * **`execute(QuizInputData data)`:**
+        1.  Calls `questionRepository.getQuestions(15)`.
+        2.  Creates a new `QuizSession` entity with these questions and starts the timer.
+        3.  Gets the *first* question (`session.getCurrentQuestion()`).
+        4.  Creates `QuizOutputData` (with image path, question number "1/15").
+        5.  Calls `quizPresenter.prepareQuizView(outputData)`.
+
+  * **`SubmitAnswerInteractor.java` (Implements `SubmitAnswerInputBoundary`)**
+
+      * **Purpose:** To check an answer and decide the outcome.
+      * **Dependencies:** `QuizSession` (needs access to the *current* session), `SubmitAnswerOutputBoundary` (the Presenter).
+      * **`execute(SubmitAnswerInputData data)`:**
+        1.  Gets the `selectedAnswer` (e.g., "A") from `inputData`.
+        2.  Gets the `currentQuestion` from the `QuizSession`.
+        3.  Compares `selectedAnswer` with `currentQuestion.getCorrectAnswer()`.
+        4.  **If CORRECT:**
+            a.  Calls `quizSession.recordAnswer(true)`.
+            b.  Creates `SubmitAnswerOutputData` (isCorrect: `true`, correctAnswer: `currentQuestion.getCorrectAnswer()`.
+            c.  Calls `submitAnswerPresenter.prepareSuccessView(outputData)`.
+            d.  **Crucially:** Calls `quizSession.advanceToNextQuestion()`.
+            e.  Checks `quizSession.isQuizOver()`.
+            \* If **NOT over**: Gets the *next* question and calls `quizPresenter.prepareQuizView(...)` to display it.
+            \* If **OVER**: Triggers the `Results` use case (calculates time, accuracy, and calls `resultsPresenter.prepareResultsView(...)`).
+        5.  **If INCORRECT:**
+            a.  Calls `quizSession.recordAnswer(false)`.
+            b.  Creates `SubmitAnswerOutputData` (isCorrect: `false`, selectedAnswer: `selectedAnswer`).
+            c.  Calls `submitAnswerPresenter.prepareFailView(outputData)`. (Does *not* advance).
+
+### Interface Adapters (`interface_adapter` package)
+
+  * **`QuizController.java`**
+
+      * The "adapter" for the View.
+      * Dependencies: `QuizInputBoundary`, `SubmitAnswerInputBoundary`.
+      * Methods:
+          * `void startQuiz()`: Calls `quizInteractor.execute(...)`.
+          * `void submitAnswer(String answer)`: Creates `SubmitAnswerInputData` and calls `submitAnswerInteractor.execute(...)`.
+
+  * **`QuizViewModel.java`**
+
+      * A state container for the `QuizView`. Uses `PropertyChangeSupport` to be observable.
+      * Fields:
+          * `String currentImagePath`
+          * `String questionProgressLabel` (e.g., "Question 5/15")
+          * `String feedbackState` (e.g., "CORRECT", "INCORRECT", "NONE")
+          * `String incorrectButton` (e.g., "A", "B", "C", or "D")
+      * `firePropertyChange(...)` notifies the View to update.
+
+  * **`QuizPresenter.java` (Implements `QuizOutputBoundary`, `SubmitAnswerOutputBoundary`)**
+
+      * **Purpose:** To format data from Interactors for the ViewModel.
+      * Dependency: `QuizViewModel`.
+      * `prepareQuizView(QuizOutputData data)`: Updates `QuizViewModel` with the new `imagePath` and `questionProgressLabel`. Sets feedback state to "NONE".
+      * `prepareSuccessView(SubmitAnswerOutputData data)`: Updates `QuizViewModel` `feedbackState` to "CORRECT".
+      * `prepareFailView(SubmitAnswerOutputData data)`: Updates `QuizViewModel` `feedbackState` to "INCORRECT" and sets `incorrectButton` to the failed answer.
+
+  * **(Similarly for `ResultsController`, `ResultsPresenter`, `ResultsViewModel`)**
+
+### Frameworks & Drivers (`view` & `data_access` packages)
+
+  * **`JsonQuestionRepository.java` (Implements `QuestionRepository`)**
+
+      * Uses a library (like **GSON** or **Jackson**) to read `questions.json`.
+      * Loads the resource stream: `InputStream is = getClass().getClassLoader().getResourceAsStream("data/questions.json");`
+      * Deserializes the JSON array into a `List<QuizQuestion>`.
+      * `getQuestions(int count)`: Shuffles the list and returns a sublist of size `count`.
+
+  * **`ScaledImagePanel.java` (Custom Swing Component)**
+
+      * This is essential for the scaling requirement.
+      * `extends JPanel`
+      * Field: `private BufferedImage image;`
+      * Method: `public void setImage(String imagePath)`
+        1.  Loads the image: `InputStream is = getClass().getClassLoader().getResourceAsStream(imagePath);`
+        2.  `this.image = ImageIO.read(is);`
+        3.  `repaint();`
+      * Override `paintComponent(Graphics g)`:
+        1.  `super.paintComponent(g);`
+        2.  `if (image != null)`:
+        3.  `g.drawImage(image, 0, 0, getWidth(), getHeight(), null);` (This line performs the scaling).
+
+  * **`QuizView.java` (extends `JFrame`, Implements `PropertyChangeListener`)**
+
+      * **Purpose:** The main quiz window.
+      * **Components:**
+          * `ScaledImagePanel` (for the top half).
+          * `JPanel` (for the bottom half) with a `GridLayout` (2x2) or `FlowLayout`.
+          * `JButton buttonA`, `buttonB`, `buttonC`, `buttonD`.
+          * `JLabel progressLabel`.
+      * **Connections:**
+          * Holds a `QuizController` and `QuizViewModel`.
+          * Adds itself as a listener: `viewModel.addPropertyChangeListener(this)`.
+          * `ActionListener` on `buttonA`: `quizController.submitAnswer("A");` (and so on for B, C, D).
+      * **`propertyChange(PropertyChangeEvent evt)` (The Core UI Logic):**
+        1.  Checks `evt.getPropertyName()`.
+        2.  If `imagePath` changed: `scaledImagePanel.setImage(viewModel.getImagePath())`.
+        3.  If `progressLabel` changed: `progressLabel.setText(viewModel.getLabel())`.
+        4.  If `feedbackState` changed:
+              * `resetButtonColors();` (set all to default).
+              * `if (viewModel.getFeedbackState().equals("INCORRECT"))`:
+                  * Get the `incorrectButton` (e.g., "A") and set its background to `Color.RED`.
+              * `if (viewModel.getFeedbackState().equals("CORRECT"))`:
+                  * Find the correct button and set its background to `Color.GREEN`.
+                  * **Auto-Advance:** Use a `javax.swing.Timer` to pause for \~1 second, then trigger the *next* question (which the `SubmitAnswerInteractor` already pushed to the `QuizPresenter`).
+
+  * **`ResultsView.java` (extends `JFrame`)**
+
+      * A simple window with `JLabel`s to show accuracy and total time.
+      * Receives data from its `ResultsViewModel`.
+
+### Entry Point (`app` package)
+
+  * **`Main.java`**
+      * This makes the module runnable.
+      * `public static void main(String[] args)`
+      * **Step 1: Data Init**
+          * `DataInitializer.run();` (or `new DataInitializer().run();`)
+      * **Step 2: Dependency Injection (Pure Java "Wiring")**
+          * `QuestionRepository repository = new JsonQuestionRepository();`
+          * `QuizViewModel quizVM = new QuizViewModel();`
+          * `ResultsViewModel resultsVM = new ResultsViewModel();`
+          * `QuizPresenter quizPresenter = new QuizPresenter(quizVM);`
+          * `// ... create all interactors, presenters, controllers...`
+          * `QuizController quizController = new QuizController(...);`
+      * **Step 3: Launch UI**
+          * `SwingUtilities.invokeLater(() -> {`
+          * `QuizView view = new QuizView(quizController, quizVM);`
+          * `view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);`
+          * `view.setSize(800, 600);`
+          * `view.setVisible(true);`
+          * `quizController.startQuiz();` // Kick off the first question
+          * `});`
+
+## 6\. 🚀 Next Steps (for Copilot)
+
+1.  **Stub Entities:** Create `QuizQuestion.java` and `QuizSession.java`.
+2.  **Stub Data Pipeline:** Create `DataInitializer.java` to scan the image folder and `JsonQuestionRepository.java` to read the (not-yet-existing) JSON.
+3.  **Implement `ScaledImagePanel.java`:** This is a crucial, custom UI component.
+4.  **Stub View:** Create `QuizView.java` with the panel and 4 buttons.
+5.  **Wire `Main.java`:** Connect the components to launch the window.
+6.  **Implement Use Cases:** Build the `QuizInteractor` and `SubmitAnswerInteractor` logic.
+7.  **Implement Presenters:** Build the `QuizPresenter` to update the `QuizViewModel`.
+8.  **Implement View Logic:** Write the `propertyChange` method in `QuizView` to handle UI updates (colors, new images).
+9.  **Build Results Flow:** Add the `ResultsView` and the logic to transition to it.
+
+<!-- end list -->
+
+```
+```
