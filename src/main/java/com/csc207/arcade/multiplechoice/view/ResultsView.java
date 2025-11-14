@@ -67,7 +67,7 @@ public class ResultsView extends JFrame implements PropertyChangeListener {
         }
     }
 
-    public void show() {
-        setVisible(true);
-    }
+//    public void show() {
+//        setVisible(true);
+//    }
 }

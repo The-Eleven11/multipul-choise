@@ -52,7 +52,8 @@ public class Main {
                 
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if ("accuracy".equals(evt.getPropertyName()) && !resultsShown) {
+                    String name = evt.getPropertyName();
+                    if (!resultsShown && ("accuracy".equals(name) || "totalTimeMs".equals(name))) {
                         resultsShown = true;
                         SwingUtilities.invokeLater(() -> {
                             quizView.setVisible(false); // Dispose instead of just hiding
