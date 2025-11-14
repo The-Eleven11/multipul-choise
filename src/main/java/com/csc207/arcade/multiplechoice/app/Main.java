@@ -52,11 +52,12 @@ public class Main {
                 
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if ("accuracy".equals(evt.getPropertyName()) && !resultsShown) {
+                    String name = evt.getPropertyName();
+                    if (!resultsShown && ("accuracy".equals(name) || "totalTimeMs".equals(name))) {
                         resultsShown = true;
                         SwingUtilities.invokeLater(() -> {
-                            quizView.setVisible(false);
-                            resultsView.show();
+                            quizView.setVisible(false); // Dispose instead of just hiding
+                            resultsView.setVisible(true); // Use setVisible instead of deprecated show()
                         });
                     }
                 }
@@ -105,6 +106,13 @@ public class Main {
         public void submitAnswer(String answer) {
             if (actualController != null) {
                 actualController.submitAnswer(answer);
+            }
+        }
+        
+        @Override
+        public void advanceToNextQuestion() {
+            if (actualController != null) {
+                actualController.advanceToNextQuestion();
             }
         }
     }

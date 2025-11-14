@@ -31,7 +31,7 @@ public class ResultsViewModel {
     public void setAccuracy(double accuracy) {
         double oldValue = this.accuracy;
         this.accuracy = accuracy;
-        support.firePropertyChange("accuracy", oldValue, accuracy);
+        support.firePropertyChange("accuracy", null, accuracy);
     }
 
     public long getTotalTimeMs() {

@@ -34,7 +34,7 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         
         // Set up frame
         setTitle("Multiple Choice Quiz");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         
         // Top panel: Image
@@ -116,20 +116,27 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         String state = viewModel.getFeedbackState();
         
         if ("INCORRECT".equals(state)) {
-            // Highlight the incorrect button in red immediately
+            // Reset colors first, then highlight the incorrect button in red immediately
+            resetButtonColors();
             String incorrectButton = viewModel.getIncorrectButton();
-            setButtonColor(incorrectButton, Color.RED);
+            if (incorrectButton != null) {
+                setButtonColor(incorrectButton, Color.RED);
+            }
         } else if ("CORRECT".equals(state)) {
-            // Highlight the correct button in green
+            // Reset colors first, then highlight the correct button in green
+            resetButtonColors();
             String correctButton = viewModel.getIncorrectButton(); // This now contains the selected answer
-            setButtonColor(correctButton, Color.GREEN);
+            if (correctButton != null) {
+                setButtonColor(correctButton, Color.GREEN);
+            }
             
-            // Auto-advance after a delay to show the green color
+            // Auto-advance after a 1-second delay to show the green color
             if (autoAdvanceTimer != null) {
                 autoAdvanceTimer.stop();
             }
             autoAdvanceTimer = new Timer(1000, e -> {
-                // Timer callback is handled by the next question loading
+                // Advance to next question after showing the green highlight
+                controller.advanceToNextQuestion();
                 autoAdvanceTimer.stop();
             });
             autoAdvanceTimer.setRepeats(false);
