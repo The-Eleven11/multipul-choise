@@ -107,5 +107,12 @@ public class Main {
                 actualController.submitAnswer(answer);
             }
         }
+        
+        @Override
+        public void advanceToNextQuestion() {
+            if (actualController != null) {
+                actualController.advanceToNextQuestion();
+            }
+        }
     }
 }

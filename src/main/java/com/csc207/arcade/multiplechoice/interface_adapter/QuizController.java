@@ -35,4 +35,15 @@ public class QuizController {
         SubmitAnswerInputData inputData = new SubmitAnswerInputData(answer);
         submitAnswerInteractor.execute(inputData);
     }
+    
+    /**
+     * Advances to the next question.
+     * Called by the view after showing feedback for a correct answer.
+     */
+    public void advanceToNextQuestion() {
+        if (submitAnswerInteractor instanceof com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor) {
+            ((com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor) submitAnswerInteractor)
+                .advanceToNextQuestion();
+        }
+    }
 }

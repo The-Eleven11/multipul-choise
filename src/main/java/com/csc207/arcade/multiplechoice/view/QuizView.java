@@ -124,12 +124,13 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             String correctButton = viewModel.getIncorrectButton(); // This now contains the selected answer
             setButtonColor(correctButton, Color.GREEN);
             
-            // Auto-advance after a delay to show the green color
+            // Auto-advance after a 1-second delay to show the green color
             if (autoAdvanceTimer != null) {
                 autoAdvanceTimer.stop();
             }
             autoAdvanceTimer = new Timer(1000, e -> {
-                // Timer callback is handled by the next question loading
+                // Advance to next question after showing the green highlight
+                controller.advanceToNextQuestion();
                 autoAdvanceTimer.stop();
             });
             autoAdvanceTimer.setRepeats(false);
