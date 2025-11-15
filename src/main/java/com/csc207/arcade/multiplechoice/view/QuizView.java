@@ -122,6 +122,18 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             if (incorrectButton != null) {
                 setButtonColor(incorrectButton, Color.RED);
             }
+            
+            // Auto-advance after a 1-second delay to show the red color
+            if (autoAdvanceTimer != null) {
+                autoAdvanceTimer.stop();
+            }
+            autoAdvanceTimer = new Timer(1000, e -> {
+                // Advance to next question after showing the red highlight
+                controller.advanceToNextQuestion();
+                autoAdvanceTimer.stop();
+            });
+            autoAdvanceTimer.setRepeats(false);
+            autoAdvanceTimer.start();
         } else if ("CORRECT".equals(state)) {
             // Reset colors first, then highlight the correct button in green
             resetButtonColors();
