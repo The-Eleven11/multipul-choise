@@ -12,6 +12,7 @@ public class QuizSession {
     private int correctAnswersCount;
     private long startTime;
     private long endTime;
+    private boolean currentQuestionAnsweredIncorrectly;
 
     /**
      * Creates a new quiz session with the given questions.
@@ -23,6 +24,7 @@ public class QuizSession {
         this.currentQuestionIndex = 0;
         this.correctAnswersCount = 0;
         this.startTime = System.currentTimeMillis();
+        this.currentQuestionAnsweredIncorrectly = false;
     }
 
     /**
@@ -39,12 +41,19 @@ public class QuizSession {
 
     /**
      * Records whether the answer was correct.
+     * Only counts the answer on the first attempt for each question.
      *
      * @param isCorrect true if the answer was correct
      */
     public void recordAnswer(boolean isCorrect) {
-        if (isCorrect) {
-            correctAnswersCount++;
+        // Only record the answer if this is the first attempt at the current question
+        if (!currentQuestionAnsweredIncorrectly) {
+            if (isCorrect) {
+                correctAnswersCount++;
+            } else {
+                // Mark that this question was answered incorrectly on first attempt
+                currentQuestionAnsweredIncorrectly = true;
+            }
         }
     }
 
@@ -55,6 +64,7 @@ public class QuizSession {
      */
     public boolean advanceToNextQuestion() {
         currentQuestionIndex++;
+        currentQuestionAnsweredIncorrectly = false; // Reset for the new question
         return currentQuestionIndex < questions.size();
     }
 
