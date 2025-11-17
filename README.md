@@ -14,6 +14,8 @@ mvn clean compile exec:java -Dexec.mainClass="com.csc207.arcade.multiplechoice.a
 
 For detailed instructions, see [RUNNING.md](RUNNING.md).
 
+> **📖 中文文档**: 如需详细的中文程序说明，请参阅 [PROGRAM_GUIDE.md](PROGRAM_GUIDE.md)（包含架构设计、依赖关系、数据流程和更新历史的完整说明）
+
 ## 1. 🎯 Project Overview
 
 This document outlines the architecture and implementation plan for the **Multiple Choice Quiz Module**, a standalone component of the "CSC207 Arcade" project. This module is designed to be developed independently but easily integrated into the main Java Swing application.
