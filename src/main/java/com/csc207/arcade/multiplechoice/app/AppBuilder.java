@@ -57,7 +57,6 @@ public class AppBuilder {
      * Must be called after build().
      */
     public void launch() {
-        SwingUtilities.invokeLater(() -> {
             // Create views
             // Note: Controller will be set after session is available
             quizView = new QuizView(null, quizViewModel);
@@ -84,7 +83,7 @@ public class AppBuilder {
             
             // Set the controller in the view
             quizView.setController(quizController);
-        });
+
     }
 
     /**
