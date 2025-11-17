@@ -13,10 +13,10 @@ public interface QuestionRepository {
     void loadData();
 
     /**
-     * Gets a random selection of questions.
+     * Gets questions from the data source.
      *
      * @param count Number of questions to retrieve
-     * @return List of random QuizQuestion objects
+     * @return List of QuizQuestion objects in the order they appear in the data source
      */
     List<QuizQuestion> getQuestions(int count);
 }
