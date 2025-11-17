@@ -20,10 +20,6 @@ import java.beans.PropertyChangeListener;
  */
 public class Main {
     public static void main(String[] args) {
-        // Step 1: Initialize data
-        System.out.println("Initializing quiz data...");
-        DataInitializer.run();
-        
         // Step 2: Dependency Injection - Create all components
         QuestionRepository repository = new JsonQuestionRepository();
         repository.loadData();
@@ -55,8 +51,11 @@ public class Main {
                     String name = evt.getPropertyName();
                     if (!resultsShown && ("accuracy".equals(name) || "totalTimeMs".equals(name))) {
                         resultsShown = true;
+                        quizView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        resultsView.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
                         SwingUtilities.invokeLater(() -> {
-                            quizView.setVisible(false); // Dispose instead of just hiding
+                            quizView.dispose(); // Dispose instead of just hiding
                             resultsView.setVisible(true); // Use setVisible instead of deprecated show()
                         });
                     }

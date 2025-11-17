@@ -49,17 +49,8 @@ public class JsonQuestionRepository implements QuestionRepository {
             allQuestions = new ArrayList<>();
         }
     }
-
     @Override
     public List<QuizQuestion> getQuestions(int count) {
-        if (allQuestions.isEmpty()) {
-            loadData();
-        }
-        
-        List<QuizQuestion> shuffled = new ArrayList<>(allQuestions);
-        Collections.shuffle(shuffled);
-        
-        int actualCount = Math.min(count, shuffled.size());
-        return shuffled.subList(0, actualCount);
+        return new ArrayList<>(allQuestions.subList(0, count));
     }
 }
