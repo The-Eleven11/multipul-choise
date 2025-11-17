@@ -768,24 +768,7 @@ A: 可以使用Java的ResourceBundle机制，将所有UI文本提取到propertie
 
 ## 附录
 
-### A. 相关链接
-
 - [Clean Architecture文章（Uncle Bob）](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [SOLID原则详解](https://en.wikipedia.org/wiki/SOLID)
 - [Java Swing教程](https://docs.oracle.com/javase/tutorial/uiswing/)
 - [GSON文档](https://github.com/google/gson)
-
-### B. 贡献者
-
-- Jiayi Yang - 准确率计算修复
-- copilot-swe-agent[bot] - 文档维护
-
-### C. 许可证
-
-本项目遵循CSC207课程项目的许可要求。
-
----
-
-**文档版本**: 1.0  
-**最后更新**: 2025年11月17日  
-**维护者**: GitHub Copilot
