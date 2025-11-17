@@ -34,7 +34,7 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         
         // Set up frame
         setTitle("Multiple Choice Quiz");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         
         // Top panel: Image
@@ -140,7 +140,11 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             if (incorrectButton != null) {
                 setButtonColor(incorrectButton, Color.RED);
             }
+            // Don't disable buttons on incorrect answer - allow user to try again
         } else if ("CORRECT".equals(state)) {
+            // Disable buttons to prevent multiple submissions during advancement
+            setButtonsEnabled(false);
+            
             // Reset colors first, then highlight the correct button in green
             resetButtonColors();
             String correctButton = viewModel.getIncorrectButton(); // This now contains the selected answer
@@ -154,14 +158,17 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             }
             autoAdvanceTimer = new Timer(1000, e -> {
                 // Advance to next question after showing the green highlight
-                if (controller != null) controller.advanceToNextQuestion();
+                if (controller != null) {
+                    controller.advanceToNextQuestion();
+                }
                 autoAdvanceTimer.stop();
             });
             autoAdvanceTimer.setRepeats(false);
             autoAdvanceTimer.start();
         } else if ("NONE".equals(state)) {
-            // Reset button colors when moving to a new question
+            // Reset button colors and re-enable buttons when moving to a new question
             resetButtonColors();
+            setButtonsEnabled(true);
         }
     }
 
@@ -187,5 +194,12 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         buttonB.setBackground(defaultColor);
         buttonC.setBackground(defaultColor);
         buttonD.setBackground(defaultColor);
+    }
+
+    private void setButtonsEnabled(boolean enabled) {
+        buttonA.setEnabled(enabled);
+        buttonB.setEnabled(enabled);
+        buttonC.setEnabled(enabled);
+        buttonD.setEnabled(enabled);
     }
 }

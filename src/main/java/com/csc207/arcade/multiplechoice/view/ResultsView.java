@@ -20,7 +20,7 @@ public class ResultsView extends JFrame implements PropertyChangeListener {
         viewModel.addPropertyChangeListener(this);
         
         setTitle("Quiz Results");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
