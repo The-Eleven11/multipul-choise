@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,10 +55,8 @@ public class JsonQuestionRepository implements QuestionRepository {
             loadData();
         }
         
-        List<QuizQuestion> shuffled = new ArrayList<>(allQuestions);
-        Collections.shuffle(shuffled);
-        
-        int actualCount = Math.min(count, shuffled.size());
-        return shuffled.subList(0, actualCount);
+        // Return questions in the order they appear in the JSON file
+        int actualCount = Math.min(count, allQuestions.size());
+        return new ArrayList<>(allQuestions.subList(0, actualCount));
     }
 }

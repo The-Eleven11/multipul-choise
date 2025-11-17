@@ -36,10 +36,6 @@ public class AppBuilder {
      * Frameworks -> Interface Adapters -> Use Cases -> Entities
      */
     public AppBuilder build() {
-        // Initialize data
-        System.out.println("Initializing quiz data...");
-        DataInitializer.run();
-        
         // Layer 1: Data Access (implements interface from use case layer)
         repository = new JsonQuestionRepository();
         
