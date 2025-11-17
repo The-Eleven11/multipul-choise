@@ -12,7 +12,7 @@ import java.beans.PropertyChangeListener;
  * Main quiz view that displays questions and answer buttons.
  */
 public class QuizView extends JFrame implements PropertyChangeListener {
-    private final QuizController controller;
+    private QuizController controller;
     private final QuizViewModel viewModel;
     
     private final ScaledImagePanel imagePanel;
@@ -69,10 +69,18 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         buttonD.setFont(buttonFont);
         
         // Add action listeners
-        buttonA.addActionListener(e -> controller.submitAnswer("A"));
-        buttonB.addActionListener(e -> controller.submitAnswer("B"));
-        buttonC.addActionListener(e -> controller.submitAnswer("C"));
-        buttonD.addActionListener(e -> controller.submitAnswer("D"));
+        buttonA.addActionListener(e -> {
+            if (controller != null) controller.submitAnswer("A");
+        });
+        buttonB.addActionListener(e -> {
+            if (controller != null) controller.submitAnswer("B");
+        });
+        buttonC.addActionListener(e -> {
+            if (controller != null) controller.submitAnswer("C");
+        });
+        buttonD.addActionListener(e -> {
+            if (controller != null) controller.submitAnswer("D");
+        });
         
         buttonPanel.add(buttonA);
         buttonPanel.add(buttonB);
@@ -85,6 +93,16 @@ public class QuizView extends JFrame implements PropertyChangeListener {
         pack();
         setSize(800, 600);
         setLocationRelativeTo(null);
+    }
+
+    /**
+     * Sets the controller for this view.
+     * Allows lazy initialization of the controller after view creation.
+     *
+     * @param controller The quiz controller to set
+     */
+    public void setController(QuizController controller) {
+        this.controller = controller;
     }
 
     @Override
@@ -136,7 +154,7 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             }
             autoAdvanceTimer = new Timer(1000, e -> {
                 // Advance to next question after showing the green highlight
-                controller.advanceToNextQuestion();
+                if (controller != null) controller.advanceToNextQuestion();
                 autoAdvanceTimer.stop();
             });
             autoAdvanceTimer.setRepeats(false);
