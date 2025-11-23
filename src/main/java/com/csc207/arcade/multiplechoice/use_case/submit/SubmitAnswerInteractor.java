@@ -55,6 +55,7 @@ public class SubmitAnswerInteractor implements SubmitAnswerInputBoundary {
      * Advances to the next question after a correct answer.
      * Should be called by the controller after a delay to show feedback.
      */
+    @Override
     public void advanceToNextQuestion() {
         // Advance to next question
         boolean hasMoreQuestions = quizSession.advanceToNextQuestion();
