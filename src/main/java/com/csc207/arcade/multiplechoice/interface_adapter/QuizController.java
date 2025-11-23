@@ -41,9 +41,6 @@ public class QuizController {
      * Called by the view after showing feedback for a correct answer.
      */
     public void advanceToNextQuestion() {
-        if (submitAnswerInteractor instanceof com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor) {
-            ((com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor) submitAnswerInteractor)
-                .advanceToNextQuestion();
-        }
+        submitAnswerInteractor.advanceToNextQuestion();
     }
 }
